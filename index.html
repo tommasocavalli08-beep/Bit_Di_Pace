@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Microfono → AI</title>
+</head>
+
+<body style="font-family:sans-serif;text-align:center;margin-top:50px;">
+    <h1>🎤 Microfono Browser</h1>
+    <button id="btn" style="font-size:30px;">PARLA</button>
+    <p id="out">...</p>
+
+    <script>
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const rec = new SpeechRecognition();
+        rec.lang = "it-IT";
+
+        document.getElementById("btn").onclick = () => {
+            rec.start();
+            document.getElementById("out").innerText = "Ascolto...";
+        };
+
+        rec.onresult = (e) => {
+            const text = e.results[0][0].transcript;
+            document.getElementById("out").innerText = text;
+
+            fetch("/api", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text })
+            })
+                .then(r => r.json())
+                .then(d => {
+                    document.getElementById("out").innerText = d.result;
+                })
+                .catch(() => {
+                    document.getElementById("out").innerText = "Errore server";
+                });
+        };
+    </script>
+</body>
+
+</html>
