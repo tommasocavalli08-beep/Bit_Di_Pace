@@ -39,11 +39,31 @@ def index():
 
 @app.post("/api")
 def api(data: TextIn):
+    # 1) Pacifica la frase in italiano
     stringHeader = (
         "ti passo una frase che potrebbe contenere qualcosa di offensivo/aggressivo. "
         "trasformala in qualcosa di più pacifico ma senza alterarne il contenuto. "
         "rispondi solo con la frase prodotta senza nessun proemio."
     )
     user_input = stringHeader + "\n" + data.text
-    response = ollama_chat_simple(user_input)
-    return {"result": response}
+    italian_result = ollama_chat_simple(user_input)
+
+    # 2) Traduci in inglese
+    translation_header_en = (
+        "Ora traduci la frase qui sotto in inglese. "
+        "Rispondi solo con la traduzione, senza spiegazioni."
+    )
+    english_result = ollama_chat_simple(translation_header_en + "\n" + italian_result)
+
+    # 3) Traduci in portoghese (Brasile)
+    translation_header_pt = (
+        "Agora traduza a frase abaixo para o português do Brasil. "
+        "Responda apenas com a tradução, sem explicações."
+    )
+    portuguese_result = ollama_chat_simple(translation_header_pt + "\n" + italian_result)
+
+    return {
+        "italian": italian_result,
+        "english": english_result,
+        "portuguese": portuguese_result
+    }
